@@ -11,17 +11,17 @@ int opcao, tamanho, i, j, n, m, digrafo, matriz_adj[MAX][MAX];  // proibido alte
 // Declare variáveis globais a partir daqui.
 
 typedef struct Elemento{
-	int num;
+	int info;
 	struct elemento *prox; //ponteiro para o proximo elemento
 } elemento;
 
 typedef struct Pilha{
-	struct elemento *topo; // ponteiro para o elemento do topo da pilha
+	struct elemento *topo;
 } pilha;
 
 typedef struct Fila{
-	int inicio;
-	int fim;
+	struct elemento *inicio_fila;
+	struct elemento *fim_fila;
 } fila;
 
 typedef struct Bfs{
@@ -86,6 +86,49 @@ void busca_largura(int v_inicial){
 	}
 	printf("\n");
 	
+}
+
+void push(int dado){
+	struct pilha *novo = (struct pilha*) malloc(sizeof(struct pilha));
+	
+	if(novo == 0)
+		return
+		
+	novo->info = dado;
+	novo->topo;
+	topo = novo;
+}
+
+int pop(){
+	if(topo == 0)
+		return -1;
+		
+	struct pilha *aux = topo;
+	int valor = aux->info;
+	topo = topo->prox;
+	free(aux);
+	return dado;
+}
+
+void exibir_pilha(){
+	if(topo == 0){
+		printf("\na pilha esta vazia.");
+		return;
+	}
+	
+	printf("\nexibindo pilha: ");
+	struct pilha *atual = topo;
+	while (atual != 0){
+		printf("%d ", atual->info);
+		atual = atual->prox;
+	}
+	
+	printf("\n");
+	
+}
+
+void enqueue(int dado){
+	struct fila *novo = 
 }
 
 void executafuncao (){   										// É dentro desta função que o aluno deverá escrever seu código
