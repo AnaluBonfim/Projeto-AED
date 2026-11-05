@@ -5,44 +5,50 @@
 
 // ATENÇÃO: O cálculo da complexidade deve incluir todo o ccódigo, inclusive a leitura do arquivo.
 
+typedef struct elemento{
+	int info;		//variavel que guarda a informacao do no
+	elemento *prox; //ponteiro para o proximo elemento (no) do grafo
+} elemento;
+
+typedef struct busca{
+	int vertice; //variavel que guarda o vertice
+	bfs *prox; //pronteiro para o proximo elemento da fila de busca
+} bfs;
+
+typedef struct pilha{
+	elemento *topo; //ponteiro que aponta para o elemento do topo da pilha
+} pilha;
+
+typedef struct fila{
+	elemento *inicio; //ponteiro de controle que aponta para o elemento inicial da fila
+	elemento *fim; //ponteiro de controle que aponta para o elemento final da fila
+} fila;
 
 char nome_arquivo[50], aux[MAX];								// proibido alterar esta linha
 int opcao, tamanho, i, j, n, m, digrafo, matriz_adj[MAX][MAX];  // proibido alterar esta linha
 // Declare variáveis globais a partir daqui.
 
-typedef struct Elemento{
-	int info;
-	struct elemento *prox; //ponteiro para o proximo elemento
-} elemento;
-
-typedef struct Pilha{
-	struct elemento *topo;
-} pilha;
-
-typedef struct Fila{
-	struct elemento *inicio_fila;
-	struct elemento *fim_fila;
-} fila;
-
-typedef struct Bfs{
-	int vertice;
-	struct bfs *prox;
-} bfs;
-
-struct bfs *inicio = 0; // ponteiros para controlar onde comeca e onde termina a fila, inicializados com 0 para = vazio
-struct bfs *fim = 0;
+bfs *inicio_busca = 0; // ponteiros para controlar onde comeca e onde termina a fila da busca, inicializados com 0 para = vazio
+bfs *fim_busca = 0;
+int visitado[MAX]; //variavel de controle para identificar os vertices ja visitados
 
 void enfileirar(int v){ //serve para enfileirar os vertices (v) que serao visitados depois
-	struct bfs *novo = (struct bfs*) malloc(sizeof(struct bfs)); //alocacao da memoria
+	bfs *novo = (bfs *) malloc(sizeof(bfs)); //alocacao da memoria
+	
+	if(novo == NULL){
+		printf("\nerro de alocacao.\n");
+		return;
+	}
+	
 	novo->vertice = v; //guarda o numero do vertice
 	novo->prox = 0; //aponta o prox igual a nulo, pois o anterior é o ultimo
 	
 	if(fim_bfs == 0){ //se a fila estiver vazia o inicio e o fim passam a ser o mesmo
-		inicio = novo;
-		fim = novo;
+		inicio_busca = novo;
+		fim_busca = novo;
 	} else { //senao estiver, conecta o antigo vertice guardado ao novo e atualiza o vertice final
-		fim->prox = novo;
-		fim = novo;
+		fim_busca->prox = novo;
+		fim_busca = novo;
 	}
 }
 
@@ -51,12 +57,12 @@ int desenfileirar(){ //serve para retirar os vertices ja visitados da fila da bf
 		return -1;
 	}
 	
-	struct bfs *aux = inicio; //o auxiliar guarda o endereco da primeira posicao
+	bfs *aux = inicio_busca; //o auxiliar guarda o endereco da primeira posicao
 	int v = aux->vertice; //pega o numero do vertice guardado na primeira posicao
-	inicio = inicio->prox; //avanca o ponteiro do inicio para a proxima posicao
+	inicio_busca = inicio_busca->prox; //avanca o ponteiro do inicio para a proxima posicao
 	
-	if(inicio == 0){ //se o novo valor guardado no inicio for zero, a fila acabou e o fim tambem vira 0
-		fim = 0;
+	if(inicio_busca == 0){ //se o novo valor guardado no inicio for zero, a fila acabou e o fim tambem vira 0
+		fim_busca = 0;
 	}
 	
 	free(aux); // libera a memoria antiga do aux
@@ -72,7 +78,7 @@ void busca_largura(int v_inicial){
 	visitado[v_inicial] = 1; //marca ele como visitado
 	
 	printf("\nResultado da busca em largura: ");
-	while(inicio != 0){ //enquanto a fila da busca nao estiver vazia sera repetido
+	while(inicio_busca != 0){ //enquanto a fila da busca nao estiver vazia sera repetido
 		int v_atual = desenfileirar(); //retira o retira o vertice da frente da fila
 		
 		printf("%d ", v_atual); //exibe o resultado atual da busca
@@ -88,48 +94,74 @@ void busca_largura(int v_inicial){
 	
 }
 
-void push(int dado){
-	struct pilha *novo = (struct pilha*) malloc(sizeof(struct pilha));
+void push(pilha *p, int dado){ //funcao inserir da pilha
+	elemento *novo = (elemento *) malloc(sizeof(elemento)); //alocacao da memoria
 	
-	if(novo == 0)
-		return
+	if(novo == 0){
+		printf("\nErro de alocacao!\n");
+		return;	
+	}
 		
-	novo->info = dado;
-	novo->topo;
-	topo = novo;
+	novo->info = dado; //guarda o novo dado
+	novo->prox = p->topo; //atualiza o proximo elemento do topo com a informacao do topo antigo
+	p->topo = novo; //atualiza o topo com o dado recem inserido
 }
 
-int pop(){
-	if(topo == 0)
+int pop(pilha *p){ //funcao de remover da pilha
+
+	if(p->topo == 0) //confere se a pilha nao esta vazia
 		return -1;
 		
-	struct pilha *aux = topo;
-	int valor = aux->info;
-	topo = topo->prox;
-	free(aux);
-	return dado;
+	elemento *aux = p->topo; //guarda o topo no ponteiro auxiliar
+	int valor = aux->info; //guarda a informacao do no do topo
+	p->topo = p->topo->prox; // substitui o topo com o valor do proximo no
+	free(aux); //libera o auxiliar e as informacoes contidas nele
+	return valor; //retorna a informacao do no que foi removido
 }
 
-void exibir_pilha(){
-	if(topo == 0){
+void exibir_pilha(){ //funcao para exibir a pilha do grafo
+
+	if(p->topo == 0){ //confere se a pilha esta vazia
 		printf("\na pilha esta vazia.");
 		return;
 	}
 	
 	printf("\nexibindo pilha: ");
-	struct pilha *atual = topo;
+	elemento *atual = p->topo; //guarda o topo como sendo o primeiro elemento a ser impresso (atual)
 	while (atual != 0){
-		printf("%d ", atual->info);
-		atual = atual->prox;
+		printf("%d ", atual->info); //executa um laco de repeticao para imprimir a informacao do no atual
+		atual = atual->prox; //avanca o atual para o elemento seguinte
 	}
 	
 	printf("\n");
 	
 }
 
-void enqueue(int dado){
-	struct fila *novo = 
+void enqueue(fila *f, int dado){ //funcao de inserir na fila
+	elemento *novo = (elemento *) malloc(sizeof(elemento));
+	
+	if(novo == 0){
+		printf("\nerro de alocacao!\n");
+		return
+	}
+	
+	novo->info = dado; //guarda o novo dado
+	novo->prox = 0; // atualiza o proximo para nulo (fim da fila)
+	
+	if(f->fim == 0){ //verifica se a fila esta vazia
+		f->inicio = novo; //aloca o novo no como o inicio e o fim da fila
+		f->fim = novo;
+	} else { //senao, atualiza o proximo elemento do fim com o novo no e indica que o fim é ele tambem
+		f->fim->prox = novo;
+		f->fim = novo;
+	}
+	
+} 
+
+int dequeue(fila *f){
+	
 }
+
 
 void executafuncao (){   										// É dentro desta função que o aluno deverá escrever seu código
 int x = 0;
